@@ -91,6 +91,8 @@ void VideoRenderAlgorithm::Render(
     }
 
     jlong early_us = frames->front()->timestamp() - playback_time;
+    SB_LOG(ERROR) << "Brown/early_us/" << early_us << "/"
+                  << frames->front()->timestamp() << "/" << playback_time;
 
     auto system_time_ns = GetSystemNanoTime();
     auto unadjusted_frame_release_time_ns =
@@ -106,6 +108,7 @@ void VideoRenderAlgorithm::Render(
     if (early_us < kBufferTooLateThreshold) {
       frames->pop_front();
       ++dropped_frames_;
+      SB_LOG(ERROR) << "Brown/dropped_frames/" << dropped_frames_ << "//";
     } else if (early_us < kBufferReadyThreshold) {
       auto status = draw_frame_cb(frames->front(), adjusted_release_time_ns);
       SB_DCHECK(status == VideoRendererSink::kReleased);

@@ -166,7 +166,9 @@ bool ParsedMimeInfo::ParseVideoInfo(const std::string& codec) {
   video_info_.bitrate = mime_type_.GetParamIntValue("bitrate", 0);
   video_info_.decode_to_texture_required =
       mime_type_.GetParamBoolValue("decode-to-texture", false);
-
+  SB_LOG(ERROR) << "Brown/decode-to-texture/"
+                << video_info_.decode_to_texture_required << "/"
+                << video_info_.frame_width << "/" << video_info_.frame_height;
   return video_info_.frame_width >= 0 && video_info_.frame_height >= 0 &&
          video_info_.fps >= 0 && video_info_.bitrate >= 0;
 }

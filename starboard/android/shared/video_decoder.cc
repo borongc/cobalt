@@ -54,7 +54,7 @@ using std::placeholders::_2;
 
 bool IsSoftwareDecodeRequired(const std::string& max_video_capabilities) {
   if (max_video_capabilities.empty()) {
-    SB_LOG(INFO)
+    SB_LOG(ERROR)
         << "Use hardware decoder as `max_video_capabilities` is empty.";
     return false;
   }
@@ -64,8 +64,8 @@ bool IsSoftwareDecodeRequired(const std::string& max_video_capabilities) {
   // so it can be parsed by MimeType.
   MimeType mime_type("video/mp4; codecs=\"vp9\"; " + max_video_capabilities);
   if (!mime_type.is_valid()) {
-    SB_LOG(INFO) << "Use hardware decoder as `max_video_capabilities` ("
-                 << max_video_capabilities << ") is invalid.";
+    SB_LOG(ERROR) << "Use hardware decoder as `max_video_capabilities` ("
+                  << max_video_capabilities << ") is invalid.";
     return false;
   }
 
@@ -73,13 +73,13 @@ bool IsSoftwareDecodeRequired(const std::string& max_video_capabilities) {
       mime_type.GetParamStringValue("softwaredecoder", "");
   if (software_decoder_expectation == "required" ||
       software_decoder_expectation == "preferred") {
-    SB_LOG(INFO) << "Use software decoder as `softwaredecoder` is set to \""
-                 << software_decoder_expectation << "\".";
+    SB_LOG(ERROR) << "Use software decoder as `softwaredecoder` is set to \""
+                  << software_decoder_expectation << "\".";
     return true;
   } else if (software_decoder_expectation == "disallowed" ||
              software_decoder_expectation == "unpreferred") {
-    SB_LOG(INFO) << "Use hardware decoder as `softwaredecoder` is set to \""
-                 << software_decoder_expectation << "\".";
+    SB_LOG(ERROR) << "Use hardware decoder as `softwaredecoder` is set to \""
+                  << software_decoder_expectation << "\".";
     return false;
   }
 
@@ -89,13 +89,13 @@ bool IsSoftwareDecodeRequired(const std::string& max_video_capabilities) {
 
   if (is_low_resolution && is_low_fps) {
     // Workaround to be compatible with existing backend implementation.
-    SB_LOG(INFO) << "Use software decoder as `max_video_capabilities` ("
-                 << max_video_capabilities
-                 << ") indicates a low resolution and low fps playback.";
+    SB_LOG(ERROR) << "Use software decoder as `max_video_capabilities` ("
+                  << max_video_capabilities
+                  << ") indicates a low resolution and low fps playback.";
     return true;
   }
 
-  SB_LOG(INFO)
+  SB_LOG(ERROR)
       << "Use hardware decoder as `max_video_capabilities` is set to \""
       << max_video_capabilities << "\".";
   return false;

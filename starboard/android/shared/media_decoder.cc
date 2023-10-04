@@ -284,9 +284,18 @@ void MediaDecoder::DecoderThreadFunc() {
         if (!can_process_input) {
           break;
         }
-        if (!ProcessOneInputBuffer(&pending_tasks, &input_buffer_indices)) {
+
+        SbTimeMonotonic last_wallclock_time_ = SbTimeGetMonotonicNow();
+        SbTimeMonotonic last_thread_time_ = SbTimeGetMonotonicThreadNow();
+        if (!ProcessOneInputBuffer(&pending_tasks, &input_buffer_indices,
+                                   "Audio", last_wallclock_time_)) {
           break;
         }
+        SbTimeMonotonic wallclock_now = SbTimeGetMonotonicNow();
+        SbTimeMonotonic thread_now = SbTimeGetMonotonicThreadNow();
+        SB_LOG(ERROR) << "Brown/Audio/" << thread_now - last_thread_time_ << "/"
+                      << wallclock_now - last_wallclock_time_ << "/"
+                      << last_wallclock_time_;
       }
     }
   } else {
@@ -336,7 +345,15 @@ void MediaDecoder::DecoderThreadFunc() {
           pending_queue_input_buffer_task_ ||
           (!pending_tasks.empty() && !input_buffer_indices.empty());
       if (can_process_input) {
-        ProcessOneInputBuffer(&pending_tasks, &input_buffer_indices);
+        SbTimeMonotonic last_wallclock_time_ = SbTimeGetMonotonicNow();
+        SbTimeMonotonic last_thread_time_ = SbTimeGetMonotonicThreadNow();
+        ProcessOneInputBuffer(&pending_tasks, &input_buffer_indices, "Video",
+                              last_wallclock_time_);
+        SbTimeMonotonic wallclock_now = SbTimeGetMonotonicNow();
+        SbTimeMonotonic thread_now = SbTimeGetMonotonicThreadNow();
+        SB_LOG(ERROR) << "Brown/Video/" << thread_now - last_thread_time_ << "/"
+                      << wallclock_now - last_wallclock_time_ << "/"
+                      << last_wallclock_time_;
       }
 
       bool ticked = false;
@@ -388,9 +405,10 @@ void MediaDecoder::CollectPendingData_Locked(
   dequeue_output_results_.clear();
 }
 
-bool MediaDecoder::ProcessOneInputBuffer(
-    std::deque<Event>* pending_tasks,
-    std::vector<int>* input_buffer_indices) {
+bool MediaDecoder::ProcessOneInputBuffer(std::deque<Event>* pending_tasks,
+                                         std::vector<int>* input_buffer_indices,
+                                         const std::string& task_type,
+                                         SbTimeMonotonic last_thread_time_) {
   SB_DCHECK(media_codec_bridge_);
 
   // During secure playback, and only secure playback, it is possible that our
@@ -478,10 +496,14 @@ bool MediaDecoder::ProcessOneInputBuffer(
   } else if (event.type == Event::kWriteInputBuffer) {
     jlong pts_us = input_buffer->timestamp();
     if (drm_system_ && input_buffer->drm_info()) {
+      SB_LOG(ERROR) << "Brown/" << task_type << "/DRM/" << pts_us << "/"
+                    << last_thread_time_;
       status = media_codec_bridge_->QueueSecureInputBuffer(
           dequeue_input_result.index, kNoOffset, *input_buffer->drm_info(),
           pts_us);
     } else {
+      SB_LOG(ERROR) << "Brown/" << task_type << "/clear/" << pts_us << "/"
+                    << last_thread_time_;
       status = media_codec_bridge_->QueueInputBuffer(
           dequeue_input_result.index, kNoOffset, size, pts_us, kNoBufferFlags);
     }

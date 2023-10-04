@@ -251,6 +251,8 @@ class HTMLMediaElement : public HTMLElement,
   std::string current_src_;
 
   std::string max_video_capabilities_;
+  // std::string max_video_capabilities_ = "width=1280; height=720;
+  // softwaredecoder=preferred; decode-to-texture=true";
 
   // Loading state.
   enum LoadState { kWaitingForSource, kLoadingFromSrcAttr };

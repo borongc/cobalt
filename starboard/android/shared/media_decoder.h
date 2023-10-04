@@ -151,7 +151,9 @@ class MediaDecoder
       std::vector<int>* input_buffer_indices,
       std::vector<DequeueOutputResult>* dequeue_output_results);
   bool ProcessOneInputBuffer(std::deque<Event>* pending_tasks,
-                             std::vector<int>* input_buffer_indices);
+                             std::vector<int>* input_buffer_indices,
+                             const std::string& task_type,
+                             SbTimeMonotonic last_thread_time_);
   void HandleError(const char* action_name, jint status);
   void ReportError(const SbPlayerError error, const std::string error_message);
 

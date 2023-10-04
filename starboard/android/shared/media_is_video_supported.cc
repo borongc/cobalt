@@ -40,6 +40,9 @@ bool SbMediaIsVideoSupported(SbMediaVideoCodec video_codec,
                              int64_t bitrate,
                              int fps,
                              bool decode_to_texture_required) {
+  /*if (frame_width > 1280 || frame_height > 720) {
+    return false;
+  }*/
   const bool must_support_hdr =
       !IsSDRVideo(bit_depth, primary_id, transfer_id, matrix_id);
   if (must_support_hdr &&

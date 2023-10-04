@@ -135,7 +135,8 @@ bool MimeType::ParseParamString(const std::string& param_string, Param* param) {
 }
 
 MimeType::MimeType(const std::string& content_type) {
-  Strings components = SplitAndTrim(content_type, ';');
+  const std::string content_type2(content_type);
+  Strings components = SplitAndTrim(content_type2, ';');
 
   if (components.empty()) {
     return;

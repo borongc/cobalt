@@ -29,6 +29,12 @@ using starboard::shared::starboard::media::MimeType;
 bool SbMediaIsAudioSupported(SbMediaAudioCodec audio_codec,
                              const MimeType* mime_type,
                              int64_t bitrate) {
+  // Android uses a libopus based opus decoder for clear content, or a platform
+  // opus decoder for encrypted content, if available.
+  if (audio_codec == kSbMediaAudioCodecOpus) {
+    return false;
+  }
+
   if (bitrate >= kSbMediaMaxAudioBitrateInBitsPerSecond) {
     return false;
   }
@@ -68,12 +74,6 @@ bool SbMediaIsAudioSupported(SbMediaAudioCodec audio_codec,
         << "Tunnel mode is rejected because int16 sample is required "
            "but not supported.";
     return false;
-  }
-
-  // Android uses a libopus based opus decoder for clear content, or a platform
-  // opus decoder for encrypted content, if available.
-  if (audio_codec == kSbMediaAudioCodecOpus) {
-    return true;
   }
 
   bool media_codec_supported =

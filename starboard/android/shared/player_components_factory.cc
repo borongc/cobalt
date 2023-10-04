@@ -44,6 +44,8 @@ bool PlayerComponents::Factory::OutputModeSupported(
       return true;
     }
     DrmSystem* android_drm_system = static_cast<DrmSystem*>(drm_system);
+    SB_LOG(ERROR) << "Brown/OutputModeSupported/:"
+                  << android_drm_system->require_secured_decoder();
     return !android_drm_system->require_secured_decoder();
   }
 

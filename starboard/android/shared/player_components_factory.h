@@ -305,27 +305,28 @@ class PlayerComponentsFactory : public starboard::shared::starboard::player::
           audio_mime_type.GetParamBoolValue("tunnelmode", false) &&
           video_mime_type.GetParamBoolValue("tunnelmode", false);
 
-      SB_LOG(INFO) << "Tunnel mode is "
-                   << (enable_tunnel_mode ? "enabled. " : "disabled. ")
-                   << "Audio mime parameter \"tunnelmode\" value: "
-                   << audio_mime_type.GetParamStringValue("tunnelmode",
-                                                          "<not provided>")
-                   << ", video mime parameter \"tunnelmode\" value: "
-                   << video_mime_type.GetParamStringValue("tunnelmode",
-                                                          "<not provided>")
-                   << ".";
+      SB_LOG(ERROR) << "Tunnel mode is "
+                    << (enable_tunnel_mode ? "enabled. " : "disabled. ")
+                    << "Audio mime parameter \"tunnelmode\" value: "
+                    << audio_mime_type.GetParamStringValue("tunnelmode",
+                                                           "<not provided>")
+                    << ", video mime parameter \"tunnelmode\" value: "
+                    << video_mime_type.GetParamStringValue("tunnelmode",
+                                                           "<not provided>")
+                    << ".";
     } else {
-      SB_LOG(INFO) << "Tunnel mode requires both an audio and video stream. "
-                   << "Audio codec: "
-                   << GetMediaAudioCodecName(creation_parameters.audio_codec())
-                   << ", Video codec: "
-                   << GetMediaVideoCodecName(creation_parameters.video_codec())
-                   << ". Tunnel mode is disabled.";
+      SB_LOG(ERROR) << "Tunnel mode requires both an audio and video stream. "
+                    << "Audio codec: "
+                    << GetMediaAudioCodecName(creation_parameters.audio_codec())
+                    << ", Video codec: "
+                    << GetMediaVideoCodecName(creation_parameters.video_codec())
+                    << ". Tunnel mode is disabled.";
     }
 
     if (kForceTunnelMode && !enable_tunnel_mode) {
-      SB_LOG(INFO) << "`kForceTunnelMode` is set to true, force enabling tunnel"
-                   << " mode.";
+      SB_LOG(ERROR)
+          << "`kForceTunnelMode` is set to true, force enabling tunnel"
+          << " mode.";
       enable_tunnel_mode = true;
     }
 

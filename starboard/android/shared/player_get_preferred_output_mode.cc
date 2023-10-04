@@ -25,6 +25,7 @@ SbPlayerOutputMode SbPlayerGetPreferredOutputMode(
     const SbPlayerCreationParam* creation_param) {
   using starboard::shared::starboard::player::filter::PlayerComponents;
 
+  SB_LOG(ERROR) << "Brown/SbPlayerGetPreferredOutputMode";
   if (!creation_param) {
     SB_LOG(ERROR) << "creation_param cannot be NULL";
     return kSbPlayerOutputModeInvalid;
@@ -73,10 +74,15 @@ SbPlayerOutputMode SbPlayerGetPreferredOutputMode(
         color_metadata.transfer, color_metadata.matrix);
   }
 
+  SB_LOG(ERROR) << "Brown/SbPlayerGetPreferredOutputMode/11/SDR:" << is_sdr;
   if (max_video_capabilities && strlen(max_video_capabilities) > 0) {
     // Sub players must use "decode-to-texture" on Android.
     // Since hdr videos are not supported under "decode-to-texture" mode, reject
     // it for sub players.
+    SB_LOG(ERROR)
+        << "Brown/SbPlayerGetPreferredOutputMode/11/OutputModeSupported:"
+        << PlayerComponents::Factory::OutputModeSupported(
+               kSbPlayerOutputModeDecodeToTexture, codec, drm_system);
     if (PlayerComponents::Factory::OutputModeSupported(
             kSbPlayerOutputModeDecodeToTexture, codec, drm_system) &&
         is_sdr) {
@@ -103,14 +109,16 @@ SbPlayerOutputMode SbPlayerGetPreferredOutputMode(
     number_of_output_modes_to_check = 1;
   }
 
+  SB_LOG(ERROR) << "Brown/SbPlayerGetPreferredOutputMode/22";
   for (int i = 0; i < number_of_output_modes_to_check; ++i) {
+    SB_LOG(ERROR) << "Brown/SbPlayerGetPreferredOutputMode/33/" << i;
     if (PlayerComponents::Factory::OutputModeSupported(output_modes_to_check[i],
                                                        codec, drm_system)) {
       return output_modes_to_check[i];
     }
   }
 
-  SB_LOG(WARNING) << "creation_param->video_stream_info.codec ("
-                  << video_stream_info.codec << ") is not supported";
+  SB_LOG(ERROR) << "Brown/ creation_param->video_stream_info.codec ("
+                << video_stream_info.codec << ") is not supported";
   return kSbPlayerOutputModeInvalid;
 }

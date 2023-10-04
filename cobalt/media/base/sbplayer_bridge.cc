@@ -1248,15 +1248,18 @@ SbPlayerOutputMode SbPlayerBridge::ComputeSbPlayerOutputMode(
         strstr(video_stream_info_.mime, "decode-to-texture=true") ||
         strstr(video_stream_info_.max_video_capabilities,
                "decode-to-texture=true");
-
+    SB_LOG(ERROR) << "Brown/output_mode/" << is_decode_to_texture_preferred
+                  << "/" << video_stream_info_.max_video_capabilities << "/"
+                  << video_stream_info_.mime;
     if (is_decode_to_texture_preferred) {
-      SB_LOG(INFO) << "Setting `default_output_mode` from \""
-                   << GetPlayerOutputModeName(default_output_mode) << "\" to \""
-                   << GetPlayerOutputModeName(
-                          kSbPlayerOutputModeDecodeToTexture)
-                   << "\" because mime is set to \"" << video_stream_info_.mime
-                   << "\", and max_video_capabilities is set to \""
-                   << video_stream_info_.max_video_capabilities << "\"";
+      SB_LOG(ERROR) << "Setting `default_output_mode` from \""
+                    << GetPlayerOutputModeName(default_output_mode)
+                    << "\" to \""
+                    << GetPlayerOutputModeName(
+                           kSbPlayerOutputModeDecodeToTexture)
+                    << "\" because mime is set to \"" << video_stream_info_.mime
+                    << "\", and max_video_capabilities is set to \""
+                    << video_stream_info_.max_video_capabilities << "\"";
       default_output_mode = kSbPlayerOutputModeDecodeToTexture;
     }
   }
