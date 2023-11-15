@@ -61,6 +61,9 @@ SbPlayerOutputMode SbPlayerGetPreferredOutputMode(
     return kSbPlayerOutputModeInvalid;
   }
 
+  // Brown: enable kSbPlayerOutputModeDecodeToTexture
+  //return kSbPlayerOutputModeDecodeToTexture;
+
   auto codec = video_stream_info.codec;
   auto drm_system = creation_param->drm_system;
   auto max_video_capabilities = video_stream_info.max_video_capabilities;

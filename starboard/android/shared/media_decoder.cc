@@ -38,6 +38,9 @@ const jint kNoBufferFlags = 0;
 // Delay to use after a retryable error has been encountered.
 const SbTime kErrorRetryDelay = 50 * kSbTimeMillisecond;
 
+bool kStart = false;
+bool kEnd = false;
+
 const char* GetNameForMediaCodecStatus(jint status) {
   switch (status) {
     case MEDIA_CODEC_OK:
@@ -296,6 +299,9 @@ void MediaDecoder::DecoderThreadFunc() {
     std::deque<Event> pending_tasks;
     std::vector<int> input_buffer_indices;
     std::vector<DequeueOutputResult> dequeue_output_results;
+    kStart = false;
+    kEnd = false;
+    int kSecret = rand();
 
     while (!destroying_.load()) {
       bool has_input =
@@ -323,6 +329,10 @@ void MediaDecoder::DecoderThreadFunc() {
           host_->RefreshOutputFormat(media_codec_bridge_.get());
         } else {
           SB_DCHECK(!tunnel_mode_enabled_);
+          if (!kEnd) {
+            SB_LOG(ERROR) << "Brown video/end/" << kSecret;
+            kEnd = true;
+          }
           host_->ProcessOutputBuffer(media_codec_bridge_.get(),
                                      dequeue_output_result);
         }
@@ -336,6 +346,10 @@ void MediaDecoder::DecoderThreadFunc() {
           pending_queue_input_buffer_task_ ||
           (!pending_tasks.empty() && !input_buffer_indices.empty());
       if (can_process_input) {
+        if (!kStart) {
+          SB_LOG(ERROR) << "Brown video/start/" << kSecret;
+          kStart = true;
+        }
         ProcessOneInputBuffer(&pending_tasks, &input_buffer_indices);
       }
 

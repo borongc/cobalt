@@ -1274,7 +1274,7 @@ SbPlayerOutputMode SbPlayerBridge::ComputeSbPlayerOutputMode(
   auto output_mode =
       sbplayer_interface_->GetPreferredOutputMode(&creation_param);
 
-  LOG(INFO) << "Output mode is set to " << GetPlayerOutputModeName(output_mode);
+  LOG(ERROR) << "Output mode is set to " << GetPlayerOutputModeName(output_mode);
 
   return output_mode;
 }
@@ -1314,6 +1314,13 @@ void SbPlayerBridge::LogStartupLatency() const {
                                                               1);
 
   // clang-format off
+  LOG(ERROR) << FormatString(
+      "\nBrown: %" PRId64 "/%" PRId64 "/%" PRId64 "/%" PRId64 "/%" PRId64 " \n",
+      startup_latency,
+      StatisticsWrapper::GetInstance()->startup_latency.min(),
+      StatisticsWrapper::GetInstance()->startup_latency.GetMedian(),
+      StatisticsWrapper::GetInstance()->startup_latency.average(),
+      StatisticsWrapper::GetInstance()->startup_latency.max());
   LOG(INFO) << FormatString(
       "\nSbPlayer startup latencies: %" PRId64 " us\n"
       "  Event name                              time since last event\n"

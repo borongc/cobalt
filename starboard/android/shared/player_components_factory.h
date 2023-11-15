@@ -54,7 +54,7 @@ namespace shared {
 // Tunnel mode has to be enabled explicitly by the web app via mime attributes
 // "tunnelmode", set the following variable to true to force enabling tunnel
 // mode on all playbacks.
-constexpr bool kForceTunnelMode = false;
+constexpr bool kForceTunnelMode = true;
 
 // By default, the platform Opus decoder is only enabled for encrypted playback.
 // Set the following variable to true to force it for clear playback.
@@ -319,7 +319,7 @@ class PlayerComponentsFactory : public starboard::shared::starboard::player::
     }
 
     if (kForceTunnelMode && !enable_tunnel_mode) {
-      SB_LOG(INFO) << "`kForceTunnelMode` is set to true, force enabling tunnel"
+      SB_LOG(ERROR) << "Brown `kForceTunnelMode` is set to true, force enabling tunnel"
                    << " mode.";
       enable_tunnel_mode = true;
     }

@@ -1083,6 +1083,13 @@ class MediaCodecBridge {
       }
 
       maybeSetMaxInputSize(format);
+
+      // https://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities#FEATURE_LowLatency
+      //if (Build.VERSION.SDK_INT > 29) {
+      //  format.setFeatureEnabled(
+      //      MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency, true /* enable */);
+      //  Log.e(TAG, "Brown: setup MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency.");
+      //}
       mMediaCodec.configure(format, surface, crypto, flags);
       mFrameRateEstimator = new FrameRateEstimator();
       return true;
