@@ -159,6 +159,8 @@ AudioTrackAudioSink::AudioTrackAudioSink(
     return;
   }
 
+  SB_LOG(ERROR) << "Brown AudioTrack created with the effective buffer size " << GetBufferSizeInFrames() << " (preferred: " << preferred_buffer_size_in_bytes << ").";
+
   audio_out_thread_ = SbThreadCreate(
       0, kSbThreadPriorityRealTime, kSbThreadNoAffinity, true,
       "audio_track_audio_out", &AudioTrackAudioSink::ThreadEntryPoint, this);
@@ -376,6 +378,9 @@ void AudioTrackAudioSink::AudioThreadFunc() {
       // Only sleep if the buffer is nearly full and the last write is partial.
       SbThreadSleep(10 * kSbTimeMillisecond);
     }
+    if (GetUnderrunCount()) {
+      SB_LOG(ERROR) << "Brown GetUnderrunCount() " << GetUnderrunCount();
+    }
   }
 
   bridge_.PauseAndFlush();
@@ -421,6 +426,10 @@ int AudioTrackAudioSink::GetUnderrunCount() {
   return bridge_.GetUnderrunCount();
 }
 
+int AudioTrackAudioSink::GetBufferSizeInFrames() {
+  return bridge_.GetBufferSizeInFrames();
+}
+
 int AudioTrackAudioSink::GetStartThresholdInFrames() {
   return bridge_.GetStartThresholdInFrames();
 }
@@ -431,12 +440,17 @@ int AudioTrackAudioSinkType::GetMinBufferSizeInFrames(
     SbMediaAudioSampleType sample_type,
     int sampling_frequency_hz) {
   SB_DCHECK(audio_track_audio_sink_type_);
-
-  return std::max(
+  int tmp = std::max(
       AudioTrackBridge::GetMinBufferSizeInFrames(sample_type, channels,
                                                  sampling_frequency_hz),
       audio_track_audio_sink_type_->GetMinBufferSizeInFramesInternal(
           channels, sample_type, sampling_frequency_hz));
+  SB_LOG(ERROR) << "Brown AudioTrackBridge::GetMinBufferSizeInFrames " << AudioTrackBridge::GetMinBufferSizeInFrames(sample_type, channels,
+                                                 sampling_frequency_hz);
+  SB_LOG(ERROR) << "Brown audio_track_audio_sink_type_->GetMinBufferSizeInFramesInternal " << audio_track_audio_sink_type_->GetMinBufferSizeInFramesInternal(
+          channels, sample_type, sampling_frequency_hz);
+  SB_LOG(ERROR) << "Brown AudioTrackAudioSinkType::GetMinBufferSizeInFrames " << tmp << "/" << channels << "/" << sample_type << "/" << sampling_frequency_hz;
+  return tmp*16;
 }
 
 AudioTrackAudioSinkType::AudioTrackAudioSinkType()
@@ -481,9 +495,11 @@ SbAudioSink AudioTrackAudioSinkType::Create(
     void* context) {
   int min_required_frames = SbAudioSinkGetMinBufferSizeInFrames(
       channels, audio_sample_type, sampling_frequency_hz);
+  SB_LOG(ERROR) << "Brown min_required_frames " << min_required_frames;
   SB_DCHECK(frames_per_channel >= min_required_frames);
   int preferred_buffer_size_in_bytes =
       min_required_frames * channels * GetBytesPerSample(audio_sample_type);
+  SB_LOG(ERROR) << "Brown preferred_buffer_size_in_bytes " << preferred_buffer_size_in_bytes;
   AudioTrackAudioSink* audio_sink = new AudioTrackAudioSink(
       this, channels, sampling_frequency_hz, audio_sample_type, frame_buffers,
       frames_per_channel, preferred_buffer_size_in_bytes,
@@ -503,7 +519,7 @@ void AudioTrackAudioSinkType::TestMinRequiredFrames() {
       [&](int number_of_channels, SbMediaAudioSampleType sample_type,
           int sample_rate, int min_required_frames) {
         bool has_remote_audio_output = HasRemoteAudioOutput();
-        SB_LOG(INFO) << "Received min required frames " << min_required_frames
+        SB_LOG(ERROR) << "Brown Received min required frames " << min_required_frames
                      << " for " << number_of_channels << " channels, "
                      << sample_rate << "hz, with "
                      << (has_remote_audio_output ? "remote" : "local")
@@ -547,12 +563,15 @@ int AudioTrackAudioSinkType::GetMinBufferSizeInFramesInternal(
     } else if (sampling_frequency_hz <= kSampleFrequency48000) {
       if (min_required_frames_map_.find(kSampleFrequency48000) !=
           min_required_frames_map_.end()) {
+        SB_LOG(ERROR) << "Brown min_required_frames_map_ " << min_required_frames_map_[kSampleFrequency48000];
         return min_required_frames_map_[kSampleFrequency48000];
       }
     }
   }
   // We cannot find a matched result from our tests, or the audio output type
   // has changed. We use the default max required frames to avoid underruns.
+  SB_LOG(ERROR) << "Brown has_remote_audio_output " << has_remote_audio_output;
+  SB_LOG(ERROR) << "Brown " << kMaxRequiredFramesRemote << "/" << kMaxRequiredFramesLocal;
   return has_remote_audio_output ? kMaxRequiredFramesRemote
                                  : kMaxRequiredFramesLocal;
 }

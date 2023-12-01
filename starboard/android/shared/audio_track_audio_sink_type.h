@@ -123,6 +123,7 @@ class AudioTrackAudioSink : public SbAudioSinkPrivate {
 
   void SetVolume(double volume) override;
   int GetUnderrunCount();
+  int GetBufferSizeInFrames();
   int GetStartThresholdInFrames();
 
  private:

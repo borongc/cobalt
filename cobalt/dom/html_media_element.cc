@@ -414,7 +414,7 @@ float HTMLMediaElement::playback_rate() const {
 }
 
 void HTMLMediaElement::set_playback_rate(float rate) {
-  LOG(INFO) << "Change playback rate from " << playback_rate_ << " to " << rate
+  LOG(ERROR) << "Brown Change playback rate from " << playback_rate_ << " to " << rate
             << ".";
 
   if (playback_rate_ != rate) {

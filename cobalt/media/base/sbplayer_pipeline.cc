@@ -846,7 +846,7 @@ void SbPlayerPipeline::CreatePlayer(SbDrmSystem drm_system) {
       audio_write_duration_for_preroll_ = audio_write_duration_ =
           HasRemoteAudioOutputs(player_bridge_->GetAudioConfigurations())
               ? audio_write_duration_remote_
-              : audio_write_duration_local_;
+              : audio_write_duration_local_ * 500;
       LOG(INFO) << "SbPlayerBridge created, with audio write duration at "
                 << audio_write_duration_for_preroll_;
 #endif  // SB_API_VERSION >= 15
@@ -1102,6 +1102,7 @@ void SbPlayerPipeline::OnNeedData(DemuxerStream::Type type,
           timestamp_of_last_written_audio_ - last_media_time_;
       auto adjusted_write_duration = AdjustWriteDurationForPlaybackRate(
           audio_write_duration_, playback_rate_);
+      LOG(ERROR) << "Brown adjusted_write_duration " << adjusted_write_duration;
       if (time_ahead_of_playback >
           (adjusted_write_duration + kMediaTimeCheckInterval)) {
         task_runner_->PostDelayedTask(
@@ -1185,7 +1186,7 @@ void SbPlayerPipeline::OnPlayerStatus(SbPlayerState state) {
       audio_write_duration_for_preroll_ = audio_write_duration_ =
           HasRemoteAudioOutputs(player_bridge_->GetAudioConfigurations())
               ? audio_write_duration_remote_
-              : audio_write_duration_local_;
+              : audio_write_duration_local_ * 500;
       LOG(INFO) << "SbPlayerBridge reaches kSbPlayerStatePresenting, with audio"
                 << " write duration at " << audio_write_duration_;
 #endif  // SB_API_VERSION >= 15

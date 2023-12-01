@@ -164,9 +164,9 @@ public class AudioTrackBridge {
       }
       audioTrackBufferSize /= 2;
     }
-    Log.i(
+    Log.e(
         TAG,
-        "AudioTrack created with buffer size %d (preferred: %d).  The minimum buffer size is"
+        "Brown AudioTrack created with buffer size %d (preferred: %d).  The minimum buffer size is"
             + " %d.",
         audioTrackBufferSize,
         preferredBufferSizeInBytes,
@@ -391,6 +391,17 @@ public class AudioTrackBridge {
       return 0;
     }
     return audioTrack.getUnderrunCount();
+  }
+
+  @SuppressWarnings("unused")
+  @UsedByNative
+  private int getBufferSizeInFrames() {
+    if (audioTrack == null) {
+      Log.e(TAG, "Unable to call getBufferSizeInFrames() with NULL audio track.");
+      return 0;
+    }
+    Log.e(TAG, "Brown getBufferSizeInFrames " + audioTrack.getBufferSizeInFrames() + "/" + audioTrack.getBufferCapacityInFrames());
+    return audioTrack.getBufferSizeInFrames();
   }
 
   @SuppressWarnings("unused")

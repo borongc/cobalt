@@ -319,7 +319,7 @@ class PlayerComponentsFactory : public starboard::shared::starboard::player::
     }
 
     if (kForceTunnelMode && !enable_tunnel_mode) {
-      SB_LOG(INFO) << "`kForceTunnelMode` is set to true, force enabling tunnel"
+      SB_LOG(ERROR) << "`kForceTunnelMode` is set to true, force enabling tunnel"
                    << " mode.";
       enable_tunnel_mode = true;
     }

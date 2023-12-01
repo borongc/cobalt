@@ -84,6 +84,7 @@ class AudioTrackBridge {
                             JniEnvExt* env = JniEnvExt::Get());
   bool GetAndResetHasAudioDeviceChanged(JniEnvExt* env = JniEnvExt::Get());
   int GetUnderrunCount(JniEnvExt* env = JniEnvExt::Get());
+  int GetBufferSizeInFrames(JniEnvExt* env = JniEnvExt::Get());
   int GetStartThresholdInFrames(JniEnvExt* env = JniEnvExt::Get());
 
  private:
