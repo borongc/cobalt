@@ -5,6 +5,8 @@
 #ifndef V8_BASE_MACROS_H_
 #define V8_BASE_MACROS_H_
 
+#include <stdint.h>
+
 #include <limits>
 #include <type_traits>
 
