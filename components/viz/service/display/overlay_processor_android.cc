@@ -18,6 +18,7 @@
 #include "ui/gfx/geometry/rect_conversions.h"
 
 #if BUILDFLAG(USE_STARBOARD_MEDIA)
+#include "media/base/media_switches.h"
 #include "components/viz/service/display/starboard/overlay_strategy_underlay_starboard.h"
 #endif // BUILDFLAG(USE_STARBOARD_MEDIA)
 
@@ -60,7 +61,13 @@ OverlayProcessorAndroid::OverlayProcessorAndroid(
   // a dummy resource that has no relation to what the overlay contains.
   // https://crbug.com/842931 .
 #if BUILDFLAG(USE_STARBOARD_MEDIA)
-  strategies_.push_back(std::make_unique<OverlayStrategyUnderlayStarboard>(this));
+  if (media::IsStarboardRendererEnabled()) {
+    strategies_.push_back(
+        std::make_unique<OverlayStrategyUnderlayStarboard>(this));
+  } else {
+    strategies_.push_back(std::make_unique<OverlayStrategyUnderlay>(
+        this, OverlayStrategyUnderlay::OpaqueMode::AllowTransparentCandidates));
+  }
 #else   // BUILDFLAG(USE_STARBOARD_MEDIA)
   strategies_.push_back(std::make_unique<OverlayStrategyUnderlay>(
       this, OverlayStrategyUnderlay::OpaqueMode::AllowTransparentCandidates));

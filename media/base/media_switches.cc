@@ -240,6 +240,11 @@ MEDIA_EXPORT extern const char kLacrosUseChromeosProtectedAv1[] =
     "lacros-use-chromeos-protected-av1";
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+// Force media player using default Renderer instead of StarboardRenderer.
+const char kDisableStarboardRenderer[] = "disable-starboard-renderer";
+#endif // BUILDFLAG(USE_STARBOARD_MEDIA)
+
 namespace autoplay {
 
 // Autoplay policy that requires a document user activation.
@@ -1556,5 +1561,15 @@ uint32_t GetPassthroughAudioFormats() {
   return 0;
 #endif  // BUILDFLAG(ENABLE_PASSTHROUGH_AUDIO_CODECS)
 }
+
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+bool IsStarboardRendererEnabled() {
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kDisableStarboardRenderer)) {
+    return false;
+  }
+  return true;
+} 
+#endif // BUILDFLAG(USE_STARBOARD_MEDIA)
 
 }  // namespace media
