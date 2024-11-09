@@ -99,6 +99,10 @@ MEDIA_EXPORT extern const char kLacrosUseChromeosProtectedMedia[];
 MEDIA_EXPORT extern const char kLacrosUseChromeosProtectedAv1[];
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+MEDIA_EXPORT extern const char kDisableStarboardRenderer[];
+#endif // BUILDFLAG(USE_STARBOARD_MEDIA)
+
 namespace autoplay {
 
 MEDIA_EXPORT extern const char kDocumentUserActivationRequiredPolicy[];
@@ -448,6 +452,10 @@ MEDIA_EXPORT bool IsMediaFoundationD3D11VideoCaptureEnabled();
 #if BUILDFLAG(ALLOW_OOP_VIDEO_DECODER)
 MEDIA_EXPORT bool IsOutOfProcessVideoDecodingEnabled();
 #endif  // BUILDFLAG(ALLOW_OOP_VIDEO_DECODER)
+
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+MEDIA_EXPORT bool IsStarboardRendererEnabled();
+#endif // BUILDFLAG(USE_STARBOARD_MEDIA)
 
 enum class kCrosGlobalMediaControlsPinOptions {
   kPin,

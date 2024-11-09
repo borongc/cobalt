@@ -73,6 +73,9 @@ public abstract class CobaltActivity extends Activity {
 
   private static final Pattern URL_PARAM_PATTERN = Pattern.compile("^[a-zA-Z0-9_=]*$");
 
+  // Media switch - media_switches::kDisableStarboardRenderer
+  private static final String DISABLE_STARBOARD_RENDERER_SWITCH = "disable-starboard-renderer";
+
   // Maintain the list of JavaScript-exposed objects as a member variable
   // to prevent them from being garbage collected prematurely.
   private List<CobaltJavaScriptAndroidObject> javaScriptAndroidObjectList = new ArrayList<>();
@@ -395,9 +398,15 @@ public abstract class CobaltActivity extends Activity {
     super.onCreate(savedInstanceState);
     createContent(savedInstanceState);
 
-    videoSurfaceView = new VideoSurfaceView(this);
-    addContentView(
-        videoSurfaceView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    if (CommandLine.getInstance().hasSwitch(DISABLE_STARBOARD_RENDERER_SWITCH)) {
+      // TODO(b/326827007): Revisit renderer to support secondary videos.
+      Log.d(TAG, "Disable starboard renderer.");
+    } else {
+      Log.d(TAG, "Enable starboard renderer.");
+      videoSurfaceView = new VideoSurfaceView(this);
+      addContentView(
+          videoSurfaceView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    }
   }
 
   /**

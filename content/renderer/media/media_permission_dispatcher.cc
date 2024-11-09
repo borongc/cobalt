@@ -11,6 +11,10 @@
 #include "third_party/blink/public/web/web_local_frame.h"
 #include "url/gurl.h"
 
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+#include "media/base/media_switches.h"
+#endif // BUILDFLAG(USE_STARBOARD_MEDIA)
+
 namespace {
 
 using Type = media::MediaPermission::Type;
@@ -150,7 +154,8 @@ void MediaPermissionDispatcher::OnPermissionStatus(
   requests_.erase(iter);
 
 #if BUILDFLAG(USE_STARBOARD_MEDIA)
-  std::move(permission_status_cb).Run(true);
+  // DRM is only supported using StarboardRenderer.
+  std::move(permission_status_cb).Run(media::IsStarboardRendererEnabled());
 #else // BUILDFLAG(USE_STARBOARD_MEDIA)
   std::move(permission_status_cb)
       .Run(status == blink::mojom::PermissionStatus::GRANTED);

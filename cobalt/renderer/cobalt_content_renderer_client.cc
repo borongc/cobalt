@@ -16,6 +16,7 @@
 #include "content/public/renderer/render_thread.h"
 #include "media/base/decoder_factory.h"
 #include "media/base/media_log.h"
+#include "media/base/media_switches.h"
 #include "media/base/renderer_factory.h"
 #include "media/renderers/video_overlay_factory.h"
 #include "media/starboard/starboard_renderer_factory.h"
@@ -192,18 +193,22 @@ CobaltContentRendererClient::GetBaseRendererFactory(
     ::media::DecoderFactory* /* decoder_factory */,
     base::RepeatingCallback<::media::GpuVideoAcceleratorFactories*()>
     /* get_gpu_factories_cb */) {
-  // TODO(b/394368542): Add Content API to create StarboardRenderer.
-  auto overlay_factory = std::make_unique<::media::VideoOverlayFactory>();
-  base::TimeDelta audio_write_duration_local =
-      base::Microseconds(kSbPlayerWriteDurationLocal);
-  base::TimeDelta audio_write_duration_remote =
-      base::Microseconds(kSbPlayerWriteDurationRemote);
-  DCHECK(video_geometry_setter_service_);
-  return std::make_unique<::media::StarboardRendererFactory>(
-      media_log, std::move(overlay_factory),
-      // TODO(b/383327725) - Cobalt: Inject these values from the web app.
-      audio_write_duration_local, audio_write_duration_remote,
-      video_geometry_setter_service_.get());
+  if (::media::IsStarboardRendererEnabled()) {
+    // TODO(b/394368542): Add Content API to create StarboardRenderer.
+    auto overlay_factory = std::make_unique<::media::VideoOverlayFactory>();
+    base::TimeDelta audio_write_duration_local =
+        base::Microseconds(kSbPlayerWriteDurationLocal);
+    base::TimeDelta audio_write_duration_remote =
+        base::Microseconds(kSbPlayerWriteDurationRemote);
+    DCHECK(video_geometry_setter_service_);
+    return std::make_unique<::media::StarboardRendererFactory>(
+        media_log, std::move(overlay_factory),
+        // TODO(b/383327725) - Cobalt: Inject these values from the web app.
+        audio_write_duration_local, audio_write_duration_remote,
+        video_geometry_setter_service_.get());
+  } else {
+    return nullptr;
+  }
 }
 
 }  // namespace cobalt
