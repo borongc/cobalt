@@ -33,6 +33,7 @@
 #include "media/base/renderer_client.h"
 #include "media/base/video_renderer_sink.h"
 #include "media/renderers/video_overlay_factory.h"
+#include "media/starboard/decode_target_provider.h"
 #include "media/starboard/sbplayer_bridge.h"
 #include "media/starboard/sbplayer_set_bounds_helper.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
@@ -210,6 +211,8 @@ class MEDIA_EXPORT StarboardRenderer final : public Renderer,
   // understood as a capability changed error. Do not change this message.
   static inline constexpr const char* kSbPlayerCapabilityChangedErrorMessage =
       "MEDIA_ERR_CAPABILITY_CHANGED";
+
+  scoped_refptr<DecodeTargetProvider> decode_target_provider_;
 
   base::WeakPtrFactory<StarboardRenderer> weak_factory_{this};
   base::WeakPtr<StarboardRenderer> weak_this_{weak_factory_.GetWeakPtr()};

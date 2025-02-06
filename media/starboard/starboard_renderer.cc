@@ -120,7 +120,8 @@ StarboardRenderer::StarboardRenderer(
       audio_write_duration_remote_(audio_write_duration_remote),
       video_overlay_factory_(std::make_unique<VideoOverlayFactory>()),
       set_bounds_helper_(new SbPlayerSetBoundsHelper),
-      cdm_context_(nullptr) {
+      cdm_context_(nullptr),
+      decode_target_provider_(new DecodeTargetProvider) {
   DCHECK(task_runner_);
   DCHECK(video_renderer_sink_);
   DCHECK(media_log_);
@@ -467,7 +468,6 @@ void StarboardRenderer::CreatePlayerBridge() {
 
     player_bridge_.reset(new SbPlayerBridge(
         &sbplayer_interface_, task_runner_,
-        // TODO(b/375070492): Implement decode-to-texture support
         SbPlayerBridge::GetDecodeTargetGraphicsContextProviderFunc(),
         audio_config, audio_mime_type, video_config, video_mime_type,
         // TODO(b/326497953): Support suspend/resume.
@@ -477,7 +477,7 @@ void StarboardRenderer::CreatePlayerBridge() {
         false,
         // TODO(b/326825450): Revisit 360 videos.
         // TODO(b/326827007): Support secondary videos.
-        kSbPlayerOutputModeInvalid,
+        kSbPlayerOutputModeInvalid, decode_target_provider_.get(),
         // TODO(b/326827007): Support secondary videos.
         "",
         // TODO(b/326654546): Revisit HTMLVideoElement.setMaxVideoInputSize.
