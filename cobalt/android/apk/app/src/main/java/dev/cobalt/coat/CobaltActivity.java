@@ -27,10 +27,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewParent;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import dev.cobalt.coat.javabridge.CobaltJavaScriptAndroidObject;
@@ -77,10 +74,6 @@ public abstract class CobaltActivity extends Activity {
 
   @SuppressWarnings("unused")
   private CobaltA11yHelper a11yHelper;
-
-  private VideoSurfaceView videoSurfaceView;
-
-  private boolean forceCreateNewVideoSurfaceView;
 
   private long timeInNanoseconds;
 
@@ -234,9 +227,13 @@ public abstract class CobaltActivity extends Activity {
     initializeJavaBridge();
     getStarboardBridge().setWebContents(getActiveWebContents());
 
+    mStartupUrl = "https://osagie98.github.io/multiple-player-demo/multi-encrypted-video.html";
+
     // Load the `url` with the same shell we created above.
     Log.i(TAG, "shellManager load url:" + mStartupUrl);
     mShellManager.getActiveShell().loadUrl(mStartupUrl);
+
+    createSurfaceViews();
   }
 
   // Initially copied from ContentShellActiviy.java
@@ -366,10 +363,8 @@ public abstract class CobaltActivity extends Activity {
     super.onCreate(savedInstanceState);
     createContent(savedInstanceState);
 
-    videoSurfaceView = new VideoSurfaceView(this);
-    a11yHelper = new CobaltA11yHelper(this, videoSurfaceView);
-    addContentView(
-        videoSurfaceView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    // a11yHelper = new CobaltA11yHelper(this, videoSurfaceView);
+    // createSurfaceViews();
   }
 
   /**
@@ -425,10 +420,6 @@ public abstract class CobaltActivity extends Activity {
       getStarboardBridge().getAudioOutputManager().dumpAllOutputDevices();
       MediaCodecCapabilitiesLogger.dumpAllDecoders();
     }
-    if (forceCreateNewVideoSurfaceView) {
-      Log.w(TAG, "Force to create a new video surface.");
-      createNewSurfaceView();
-    }
 
     DisplayUtil.cacheDefaultDisplay(this);
     DisplayUtil.addDisplayListener(this);
@@ -452,14 +443,6 @@ public abstract class CobaltActivity extends Activity {
     if (webContents != null) {
       webContents.onHide();
     }
-
-    if (VideoSurfaceView.getCurrentSurface() != null) {
-      forceCreateNewVideoSurfaceView = true;
-    }
-
-    // Set the SurfaceView to fullscreen.
-    View rootView = getWindow().getDecorView();
-    setVideoSurfaceBounds(0, 0, rootView.getWidth(), rootView.getHeight());
   }
 
   @Override
@@ -585,62 +568,12 @@ public abstract class CobaltActivity extends Activity {
     getStarboardBridge().onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  public void resetVideoSurface() {
-    runOnUiThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            createNewSurfaceView();
-          }
-        });
-  }
-
-  public void setVideoSurfaceBounds(final int x, final int y, final int width, final int height) {
-    if (width == 0 || height == 0) {
-      // The SurfaceView should be covered by our UI layer in this case.
-      return;
-    }
-    runOnUiThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            LayoutParams layoutParams = videoSurfaceView.getLayoutParams();
-            // Since videoSurfaceView is added directly to the Activity's content view, which is a
-            // FrameLayout, we expect its layout params to become FrameLayout.LayoutParams.
-            if (layoutParams instanceof FrameLayout.LayoutParams) {
-              ((FrameLayout.LayoutParams) layoutParams).setMargins(x, y, x + width, y + height);
-            } else {
-              Log.w(
-                  TAG,
-                  "Unexpected video surface layout params class "
-                      + layoutParams.getClass().getName());
-            }
-            layoutParams.width = width;
-            layoutParams.height = height;
-            // Even though as a NativeActivity we're not using the Android UI framework, by setting
-            // the  layout params it will force a layout to be requested. That will cause the
-            // SurfaceView to position its underlying Surface to match the screen coordinates of
-            // where the view would be in a UI layout and to set the surface transform matrix to
-            // match the view's size.
-            videoSurfaceView.setLayoutParams(layoutParams);
-          }
-        });
-  }
-
-  private void createNewSurfaceView() {
-    ViewParent parent = videoSurfaceView.getParent();
-    if (parent instanceof FrameLayout) {
-      FrameLayout frameLayout = (FrameLayout) parent;
-      int index = frameLayout.indexOfChild(videoSurfaceView);
-      frameLayout.removeView(videoSurfaceView);
-      videoSurfaceView = new VideoSurfaceView(this);
-      a11yHelper = new CobaltA11yHelper(this, videoSurfaceView);
-      frameLayout.addView(
-          videoSurfaceView,
-          index,
-          new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-    } else {
-      Log.w(TAG, "Unexpected surface view parent class " + parent.getClass().getName());
+  private void createSurfaceViews() {
+     for (int i = 0; i < 5; i++) {
+       VideoSurfaceView videoSurfaceView = new VideoSurfaceView(this);
+       // videoSurfaceView.setZOrderOnTop(true);
+       addContentView(
+           videoSurfaceView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
   }
 
