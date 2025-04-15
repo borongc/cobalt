@@ -36,7 +36,9 @@ GetVideoGeometrySetter() {
 
 OverlayStrategyUnderlayStarboard::OverlayStrategyUnderlayStarboard(
     OverlayProcessorUsingStrategy* capability_checker)
-    : OverlayStrategyUnderlay(capability_checker) {}
+    : OverlayStrategyUnderlay(capability_checker) {
+  LOG(ERROR) << "Cobalt: " << __func__;
+}
 
 OverlayStrategyUnderlayStarboard::~OverlayStrategyUnderlayStarboard() {}
 
@@ -51,6 +53,7 @@ void OverlayStrategyUnderlayStarboard::Propose(
     const PrimaryPlane* primary_plane,
     std::vector<OverlayProposedCandidate>* candidates,
     std::vector<gfx::Rect>* content_bounds) {
+  LOG(ERROR) << "Cobalt: " << __func__;
   auto* render_pass = render_pass_list->back().get();
   QuadList& quad_list = render_pass->quad_list;
   OverlayCandidate candidate;
@@ -99,6 +102,7 @@ bool OverlayStrategyUnderlayStarboard::Attempt(
     OverlayCandidateList* candidate_list,
     std::vector<gfx::Rect>* content_bounds,
     const OverlayProposedCandidate& proposed_candidate) {
+  LOG(ERROR) << "Cobalt: " << __func__;
   // Before we attempt an overlay strategy, the candidate list should be empty.
   DCHECK(candidate_list->empty());
   auto* render_pass = render_pass_list->back().get();
@@ -165,8 +169,6 @@ bool OverlayStrategyUnderlayStarboard::Attempt(
 
       OverlayProposedCandidate proposed_to_commit(it, candidate, this);
       CommitCandidate(proposed_to_commit, render_pass);
-
-      break;
     }
   }
 
@@ -180,6 +182,7 @@ bool OverlayStrategyUnderlayStarboard::Attempt(
 void OverlayStrategyUnderlayStarboard::CommitCandidate(
     const OverlayProposedCandidate& proposed_candidate,
     AggregatedRenderPass* render_pass) {
+  LOG(ERROR) << "Cobalt: " << __func__;
   DCHECK(GetVideoGeometrySetter());
   GetVideoGeometrySetter()->SetVideoGeometry(
       proposed_candidate.candidate.display_rect,
@@ -204,6 +207,10 @@ void OverlayStrategyUnderlayStarboard::AdjustOutputSurfaceOverlay(
   if (output_surface_plane) {
     output_surface_plane->enable_blending = true;
   }
+}
+
+OverlayStrategy OverlayStrategyUnderlayStarboard::GetUMAEnum() const {
+  return OverlayStrategy::kUnderlay;
 }
 
 // static

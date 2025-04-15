@@ -286,7 +286,9 @@ static void LogFramesScalingRequiredCandidateBoolUMA(bool attempted_scaling) {
 }
 
 OverlayProcessorUsingStrategy::OverlayProcessorUsingStrategy()
-    : max_overlays_config_(features::MaxOverlaysConsidered()) {}
+    : max_overlays_config_(features::MaxOverlaysConsidered()) {
+  LOG(ERROR) << "Cobalt: " << __func__ << " " << max_overlays_config_;
+}
 
 OverlayProcessorUsingStrategy::~OverlayProcessorUsingStrategy() = default;
 
@@ -763,9 +765,11 @@ bool OverlayProcessorUsingStrategy::AttemptWithStrategies(
 
   if (ShouldAttemptMultipleOverlays(proposed_candidates)) {
     auto* render_pass = render_pass_list->back().get();
+    LOG(ERROR) << "Cobalt: " << __func__;
     return AttemptMultipleOverlays(proposed_candidates, primary_plane,
                                    render_pass, *candidates);
   }
+  LOG(ERROR) << "Cobalt: " << __func__;
 
   bool has_required_overlay = false;
   bool attempted_scaling_required_overlays = false;
@@ -867,6 +871,7 @@ bool OverlayProcessorUsingStrategy::ShouldAttemptMultipleOverlays(
   if (max_overlays_config_ <= 1) {
     UMA_HISTOGRAM_ENUMERATION(kShouldAttemptMultipleOverlaysHistogramName,
                               AttemptingMultipleOverlays::kNoFeatureDisabled);
+    LOG(ERROR) << "Cobalt: " << __func__;
     return false;
   }
 
@@ -877,6 +882,7 @@ bool OverlayProcessorUsingStrategy::ShouldAttemptMultipleOverlays(
     if (proposed.candidate.requires_overlay) {
       UMA_HISTOGRAM_ENUMERATION(kShouldAttemptMultipleOverlaysHistogramName,
                                 AttemptingMultipleOverlays::kNoRequiredOverlay);
+      LOG(ERROR) << "Cobalt: " << __func__;
       return false;
     }
     // Using multiple overlays only makes sense with SingleOnTop and Underlay
@@ -887,10 +893,12 @@ bool OverlayProcessorUsingStrategy::ShouldAttemptMultipleOverlays(
       UMA_HISTOGRAM_ENUMERATION(
           kShouldAttemptMultipleOverlaysHistogramName,
           AttemptingMultipleOverlays::kNoUnsupportedStrategy);
+      LOG(ERROR) << "Cobalt: " << __func__;
       return false;
     }
   }
 
+  LOG(ERROR) << "Cobalt: " << __func__;
   UMA_HISTOGRAM_ENUMERATION(kShouldAttemptMultipleOverlaysHistogramName,
                             AttemptingMultipleOverlays::kYes);
   return true;
@@ -902,6 +910,7 @@ bool OverlayProcessorUsingStrategy::AttemptMultipleOverlays(
     AggregatedRenderPass* render_pass,
     OverlayCandidateList& candidates) {
   if (sorted_candidates.empty()) {
+    LOG(ERROR) << "Cobalt: " << __func__;
     UMA_HISTOGRAM_COUNTS_100(kNumOverlaysAttemptedHistogramName, 0);
     UMA_HISTOGRAM_COUNTS_100(kNumOverlaysFailedHistogramName, 0);
     return false;
@@ -920,6 +929,9 @@ bool OverlayProcessorUsingStrategy::AttemptMultipleOverlays(
       std::distance(sorted_candidates.begin(), first_candidate_without_masks);
   int candidates_without_masks_count =
       sorted_candidates.size() - candidates_with_masks_count;
+  LOG(ERROR) << "Cobalt: " << __func__ << " "
+             << candidates_with_masks_count << " "
+             << candidates_without_masks_count;
 
   // If `sorted_candidates` only contains candidates with masks, we can skip
   // promoting them to overlays.
@@ -974,6 +986,7 @@ bool OverlayProcessorUsingStrategy::AttemptMultipleOverlays(
             it->candidate.has_rounded_display_masks ? 2 : 1;
         break;
       case OverlayStrategy::kUnderlay:
+        LOG(ERROR) << "Cobalt: " << __func__;
         testing_underlay = true;
         underlay_iters.push_back(it);
         break;
@@ -1035,6 +1048,9 @@ bool OverlayProcessorUsingStrategy::AttemptMultipleOverlays(
   UMA_HISTOGRAM_COUNTS_100(kNumOverlaysFailedHistogramName,
                            num_overlays_attempted - num_overlays_promoted);
 
+  LOG(ERROR) << "Cobalt: " << __func__ << " "
+             << num_overlays_attempted << " "
+             << num_overlays_promoted;
   if (candidates.empty()) {
     LogStrategyEnumUMA(OverlayStrategy::kNoStrategyAllFail);
     return false;
