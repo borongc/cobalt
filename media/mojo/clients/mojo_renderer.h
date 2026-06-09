@@ -19,6 +19,9 @@
 #include "media/base/renderer.h"
 #include "media/base/time_delta_interpolator.h"
 #include "media/mojo/mojom/renderer.mojom.h"
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+#include "media/mojo/common/starboard/mojo_renderer_bypass_bridge.h"
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 #include "mojo/public/cpp/bindings/associated_receiver.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/remote.h"
@@ -135,7 +138,9 @@ class MojoRenderer : public Renderer, public mojom::RendererClient {
 
 #if BUILDFLAG(USE_STARBOARD_MEDIA)
   bool bypass_mojo_for_media_ = false;
-#endif
+  scoped_refptr<MojoRendererBypassBridge> bypass_bridge_;
+  uint32_t bypass_id_ = 0;
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 
   // Mojo demuxer streams.
   // Owned by MojoRenderer instead of remote mojom::Renderer
@@ -170,6 +175,10 @@ class MojoRenderer : public Renderer, public mojom::RendererClient {
   media::TimeDeltaInterpolator media_time_interpolator_;
 
   std::optional<PipelineStatistics> pending_stats_;
+
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+  base::WeakPtrFactory<MojoRenderer> weak_factory_{this};
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 };
 
 }  // namespace media

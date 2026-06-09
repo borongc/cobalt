@@ -5,6 +5,9 @@
 #include "media/mojo/clients/mojo_renderer.h"
 
 #include <utility>
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+#include <atomic>
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 
 #if BUILDFLAG(USE_STARBOARD_MEDIA)
 #include "base/command_line.h"
@@ -28,6 +31,12 @@
 #include "media/renderers/video_overlay_factory.h"
 
 namespace media {
+
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+namespace {
+std::atomic<uint32_t> g_next_bypass_id{1};
+}  // namespace
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 
 MojoRenderer::MojoRenderer(
     const scoped_refptr<base::SequencedTaskRunner>& task_runner,
@@ -53,6 +62,13 @@ MojoRenderer::MojoRenderer(
 MojoRenderer::~MojoRenderer() {
   DVLOG(1) << __func__;
   DCHECK(task_runner_->RunsTasksInCurrentSequence());
+
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+  if (bypass_bridge_) {
+    bypass_bridge_->Invalidate();
+    BypassBridgeRegistry::Unregister(bypass_id_);
+  }
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 
   CancelPendingCallbacks();
 }
@@ -82,17 +98,22 @@ void MojoRenderer::Initialize(MediaResource* media_resource,
     for (media::DemuxerStream* stream : streams) {
       stream_pointers.push_back(reinterpret_cast<uint64_t>(stream));
     }
-    
+    // Create the bypass bridge to manage shared state and callbacks.
+    bypass_bridge_ = base::MakeRefCounted<MojoRendererBypassBridge>(
+        task_runner_,
+        base::BindRepeating(&MojoRenderer::OnTimeUpdate, weak_factory_.GetWeakPtr()),
+        base::BindRepeating(&MojoRenderer::OnStatisticsUpdate, weak_factory_.GetWeakPtr()));
+    // Set the actual streams in the bridge.
+    DemuxerStream* audio_stream = media_resource_->GetFirstStream(DemuxerStream::AUDIO);
+    DemuxerStream* video_stream = media_resource_->GetFirstStream(DemuxerStream::VIDEO);
+    bypass_bridge_->SetStreams(audio_stream, video_stream);
+    // Generate a unique ID and register the bridge.
+    bypass_id_ = g_next_bypass_id.fetch_add(1);
+    BypassBridgeRegistry::Register(bypass_id_, bypass_bridge_);
     BindRemoteRendererIfNeeded();
-    
-    // Pass 'this' as a raw pointer (cast to uint64_t) to bypass Mojo for
-    // high-frequency callbacks like OnStatisticsUpdate and OnTimeUpdate.
-    // This is safe in single-process mode because MojoRenderer outlives
-    // MojoRendererService (guaranteed by Mojo SelfOwnedReceiver).
     remote_renderer_->InitializeWithStreamPointers(client_receiver_.BindNewEndpointAndPassRemote(),
                                                    std::move(stream_pointers),
-                                                   reinterpret_cast<uint64_t>(static_cast<mojom::RendererClient*>(this)),
-                                                   reinterpret_cast<uint64_t>(task_runner_.get()),
+                                                   bypass_id_,
                                                    base::BindOnce(&MojoRenderer::OnInitialized,
                                                                   base::Unretained(this), client));
     return;

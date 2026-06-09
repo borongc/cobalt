@@ -58,8 +58,7 @@ class FakeMojomRenderer : public mojom::Renderer {
   void InitializeWithStreamPointers(
       mojo::PendingAssociatedRemote<mojom::RendererClient>,
       const std::optional<std::vector<uint64_t>>& stream_pointers,
-      uint64_t client_pointer,
-      uint64_t task_runner_pointer,
+      uint32_t bypass_bridge_id,
       InitializeWithStreamPointersCallback cb) override {
     std::move(cb).Run(true);
   }

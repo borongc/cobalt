@@ -32,6 +32,9 @@
 namespace media {
 
 class CdmContextRef;
+#if BUILDFLAG(USE_STARBOARD_MEDIA)
+class MojoRendererBypassBridge;
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 class MediaResourceShim;
 class MojoCdmServiceContext;
 class Renderer;
@@ -68,10 +71,9 @@ class MEDIA_MOJO_EXPORT MojoRendererService final : public mojom::Renderer,
   void InitializeWithStreamPointers(
       mojo::PendingAssociatedRemote<mojom::RendererClient> client,
       const std::optional<std::vector<uint64_t>>& stream_pointers,
-      uint64_t client_pointer,
-      uint64_t task_runner_pointer,
+      uint32_t bypass_bridge_id,
       InitializeWithStreamPointersCallback callback) final;
-#endif
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
   void Flush(FlushCallback callback) final;
   void StartPlayingFrom(base::TimeDelta time_delta) final;
   void SetPlaybackRate(double playback_rate) final;
@@ -136,9 +138,8 @@ class MEDIA_MOJO_EXPORT MojoRendererService final : public mojom::Renderer,
   base::TimeDelta last_media_time_;
 
 #if BUILDFLAG(USE_STARBOARD_MEDIA)
-  uint64_t client_pointer_ = 0;
-  scoped_refptr<base::SequencedTaskRunner> client_task_runner_;
-#endif
+  scoped_refptr<MojoRendererBypassBridge> bypass_bridge_;
+#endif  // BUILDFLAG(USE_STARBOARD_MEDIA)
 
   mojo::AssociatedRemote<mojom::RendererClient> client_;
 
